@@ -26,6 +26,19 @@
                     })
             })
           } 
+          if (document.querySelectorAll("#userPresenceDialog")) {
+              var users = document.querySelectorAll("#userPresenceDialog > div.dijitDialogPaneContent > div > div > div > div > span");
+              chrome.storage.local.get("data", (data) => {
+                var data = JSON.parse(data.data);
+                users.forEach(user => {
+                    var eid = user.innerHTML;
+                    var findName = data.find(item => item.eid === eid);
+                    if (findName) {
+                        user.innerHTML = `${eid} (${findName.name})`
+                    }
+                })
+              })
+          }
     }
   });
   
