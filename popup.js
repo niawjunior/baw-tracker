@@ -1,155 +1,182 @@
-document.addEventListener('DOMContentLoaded', function () {
-
-  chrome.storage.local.get("data", (data) => {
-    var data = JSON.parse(data.data);
-    if (data && data.length > 0) {
-      // Loop through the saved data and create a new row for each object
-      data.forEach(function (obj) {
-        // Only create a new row if both eid and name are not empty
-        if (obj.eid && obj.name) {
-          var rowContainer = document.getElementById('row-container');
-          var newRow = document.createElement('div');
-          newRow.classList.add('row', 'mb-2');
-          newRow.innerHTML = `
-        <div class="w-1/2 pr-2">
-          <input type="text" name="eid[]" placeholder="EID" class="w-full px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500" value="${obj.eid}" />
-        </div>
-        <div class="w-1/2 pl-2">
-          <input type="text" name="name[]" placeholder="Name" class="w-full px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500" value="${obj.name}" />
-        </div>
-        <span class="delete-icon text-gray-500 cursor-pointer hover:text-red-500 ml-2">-</span>`;
-          rowContainer.appendChild(newRow);
-          var deleteButtons = document.querySelectorAll('.delete-icon');
-          for (var i = 0; i < deleteButtons.length; i++) {
-            deleteButtons[i].addEventListener('click', function () {
-              this.parentNode.remove();
-            });
-          }
-        }
-      });
+document.addEventListener("DOMContentLoaded", function () {
+  chrome.storage.local.get("data", (storedData) => {
+    const data = JSON.parse(storedData.data);
+    if (!data || data.length === 0) {
+      return;
     }
 
+    const rowContainer = document.getElementById("row-container");
+    for (const obj of data) {
+      if (obj.eid && obj.name) {
+        const newRow = createRow(obj.eid, obj.name);
+        rowContainer.appendChild(newRow);
+      }
+    }
 
+    setupDeleteButtons();
   });
 
-  var addButton = document.querySelector('.plus-icon');
+  const addButton = document.querySelector(".plus-icon");
+  const rowContainer = document.getElementById("row-container");
+  const messageContainer = document.querySelector("#message-container");
 
-  addButton.addEventListener('click', function () {
-    var rowContainer = document.getElementById('row-container');
-    var newRow = document.createElement('div');
-    newRow.classList.add('row', 'mb-2');
-    newRow.innerHTML = `
-    <div class="w-1/2 pr-2">
-      <input type="text" name="eid[]" placeholder="EID" class="w-full px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500" />
-    </div>
-    <div class="w-1/2 pl-2">
-      <input type="text" name="name[]" placeholder="Name" class="w-full px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500" />
-    </div>
-    <span class="delete-icon text-gray-500 cursor-pointer hover:text-red-500 ml-2">-</span>`;
+  addButton.addEventListener("click", () => {
+    const newRow = createRow();
     rowContainer.appendChild(newRow);
+  });
 
-    var deleteButtons = document.querySelectorAll('.delete-icon');
-    for (var i = 0; i < deleteButtons.length; i++) {
-      deleteButtons[i].addEventListener('click', function () {
+  rowContainer.addEventListener("click", (event) => {
+    if (event.target.classList.contains("delete-icon")) {
+      event.target.parentNode.remove();
+    }
+  });
+
+  function setupDeleteButtons() {
+    const deleteButtons = document.querySelectorAll(".delete-icon");
+    for (const button of deleteButtons) {
+      button.addEventListener("click", function () {
         this.parentNode.remove();
       });
     }
-  });
+  }
 
+  function createRow(eid = "", name = "") {
+    const newRow = document.createElement("div");
+    newRow.classList.add("row", "mb-2");
 
+    const eidInput = document.createElement("input");
+    eidInput.setAttribute("type", "text");
+    eidInput.setAttribute("name", "eid[]");
+    eidInput.setAttribute("placeholder", "EID");
+    eidInput.setAttribute(
+      "class",
+      "w-full px-4 py-2 mx-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500"
+    );
+    eidInput.setAttribute("value", eid);
 
-  var applyButton = document.getElementById('apply-button');
-  var messageContainer = document.querySelector('#message-container');
-  applyButton.addEventListener('click', function () {
+    const nameInput = document.createElement("input");
+    nameInput.setAttribute("type", "text");
+    nameInput.setAttribute("name", "name[]");
+    nameInput.setAttribute("placeholder", "Name");
+    nameInput.setAttribute(
+      "class",
+      "w-full px-4 py-2 mx-2 rounded-lg border border-gray-400 focus:outline-none focus:border-blue-500"
+    );
+    nameInput.setAttribute("value", name);
 
-    var data = [];
-    var rows = document.querySelectorAll('#row-container .row')
-    var isValid = true;
+    const deleteButton = document.createElement("span");
+    deleteButton.classList.add(
+      "delete-icon",
+      "text-gray-500",
+      "cursor-pointer",
+      "hover:text-red-500",
+      "ml-2"
+    );
+    deleteButton.innerText = "-";
+
+    newRow.appendChild(eidInput);
+    newRow.appendChild(nameInput);
+    newRow.appendChild(deleteButton);
+
+    return newRow;
+  }
+
+  const applyButton = document.getElementById("apply-button");
+
+  function validateData(rows) {
+    const data = [];
+    let isValid = true;
 
     rows.forEach(function (item) {
-       var eidInput = item.querySelector('input[name="eid[]"]');
-         var nameInput = item.querySelector('input[name="name[]"]');
+      const eidInput = item.querySelector('input[name="eid[]"]');
+      const nameInput = item.querySelector('input[name="name[]"]');
 
-         var eidValue = eidInput.value.trim();
-         var nameValue = nameInput.value.trim();
-      if (eidValue === '' && nameValue === '') {
-        // Skip empty rows
-        return;
-      }
-      if (eidValue === '' || nameValue === '') {
+      const eidValue = eidInput.value.trim();
+      const nameValue = nameInput.value.trim();
+
+      if (eidValue === "" || nameValue === "") {
         isValid = false;
-        messageContainer.innerHTML = '<p class="mt-4 text-red-500">Please fill out all fields</p>';
+        const message = document.createElement("p");
+        message.className = "mt-4 text-red-500";
+        message.textContent = "Please fill out all fields";
+        messageContainer.appendChild(message);
         return;
       }
 
-      if (eidValue !== '' && nameValue !== '') {
-        var existingObject = data.find(function(obj) {
-          return obj.eid === eidValue
-        })
+      const existingObject = data.find(function (obj) {
+        return obj.eid === eidValue;
+      });
 
-        if (existingObject) {
-          isValid = false;
-          messageContainer.innerHTML = `<p class="mt-4 text-red-500">This EID ${eidValue} already exists.</p>`;
-          return;
-        } else {
-          data.push({ eid: eidValue, name: nameValue });
-        }
+      if (existingObject) {
+        isValid = false;
+        const message = document.createElement("p");
+        message.className = "mt-4 text-red-500";
+        message.textContent = `This EID ${eidValue} already exists.`;
+        messageContainer.appendChild(message);
+        return;
       }
 
+      data.push({ eid: eidValue, name: nameValue });
     });
-    if (isValid) {
-      console.log(data)
-      chrome.runtime.sendMessage({
-        type: "apply",
-        value: JSON.stringify(data),
-      }).then(() => {
-         // Show confirmation message
-        // if (data.length === 0) {
-        //    messageContainer.innerHTML = '<p class="text-red-500">Please enter at least one EID and Name.</p>'
-        // } else {
-           messageContainer.innerHTML = '<p class="mt-4 text-green-500">Data saved successfully</p>'
-    
-           // Close the window after a delay
-           setTimeout(function() {
-             window.close();
-           }, 1000);
 
-        // }
-      })
+    return isValid ? data : null;
+  }
+
+  applyButton.addEventListener("click", function () {
+    const rows = document.querySelectorAll("#row-container .row");
+    const data = validateData(rows);
+
+    if (data) {
+      console.log(data);
+      chrome.runtime
+        .sendMessage({
+          type: "apply",
+          value: JSON.stringify(data),
+        })
+        .then(() => {
+          const message = document.createElement("p");
+          message.className = "mt-4 text-green-500";
+          message.textContent = "Data saved successfully";
+          messageContainer.appendChild(message);
+
+          setTimeout(function () {
+            window.close();
+          }, 1000);
+        });
     }
-  
   });
 
-
-  var closeButton = document.getElementById('close-button');
-
-  closeButton.addEventListener('click', function () {
+  function handleCloseClick() {
     window.close();
-  });
+  }
 
-
-  var checkButton = document.getElementById('check-button');
-
-  checkButton.addEventListener('click', function () {
-    chrome.tabs.query({
-      active: true,
-      currentWindow: true
-    }, function(tabs) {
-      var tabId = tabs[0].id;
-      chrome.tabs.sendMessage(tabId, {
-        action: 'get-info'
-      })
-      // chrome.runtime.sendMessage({
-      //   type: "check",
-      // }).then((data) => {
-      //   console.log(data);
-      // })
-    })
-  });
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.user) {
-        var lastSavedBy = document.querySelector('#last-saved');
-        lastSavedBy.innerHTML = request.user;
+  function handleCheckClick() {
+    chrome.tabs.query(
+      {
+        active: true,
+        currentWindow: true,
+      },
+      function (tabs) {
+        var tabId = tabs[0].id;
+        chrome.tabs.sendMessage(tabId, {
+          action: "get-info",
+        });
       }
-    })
-})
+    );
+  }
+
+  function handleUserMessage(request, sender, sendResponse) {
+    if (request.user) {
+      var lastSavedBy = document.querySelector("#last-saved");
+      lastSavedBy.innerHTML = request.user;
+    }
+  }
+
+  var closeButton = document.getElementById("close-button");
+  closeButton.addEventListener("click", handleCloseClick);
+
+  var checkButton = document.getElementById("check-button");
+  checkButton.addEventListener("click", handleCheckClick);
+
+  chrome.runtime.onMessage.addListener(handleUserMessage);
+});
