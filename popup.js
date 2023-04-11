@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   chrome.storage.local.get("data", (storedData) => {
-    const data = JSON.parse(storedData.data);
+    const data = storedData.data ? JSON.parse(storedData.data) : []
     if (!data || data.length === 0) {
       return;
     }
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const addButton = document.querySelector(".plus-icon");
-  const rowContainer = document.getElementById("row-container");
+  const rowContainer = document.querySelector('#row-container');
   const messageContainer = document.querySelector("#message-container");
 
   addButton.addEventListener("click", () => {
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return newRow;
   }
 
-  const applyButton = document.getElementById("apply-button");
+  const applyButton = document.querySelector('#apply-button');
 
   function validateData(rows) {
     const data = [];
@@ -127,7 +127,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const data = validateData(rows);
 
     if (data) {
-      console.log(data);
       chrome.runtime
         .sendMessage({
           type: "apply",
@@ -158,9 +157,15 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       function (tabs) {
         var tabId = tabs[0].id;
-        chrome.tabs.sendMessage(tabId, {
-          action: "get-info",
-        });
+
+        chrome.storage.local.get("data", (storedData) => {
+          const data = storedData.data ? JSON.parse(storedData.data) : []
+          chrome.tabs.sendMessage(tabId, {
+            action: "get-info",
+            value: data
+          })
+        })
+       
       }
     );
   }
@@ -172,10 +177,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  var closeButton = document.getElementById("close-button");
+  const closeButton = document.querySelector('#close-button');
   closeButton.addEventListener("click", handleCloseClick);
 
-  var checkButton = document.getElementById("check-button");
+  const checkButton = document.querySelector('#check-button');
   checkButton.addEventListener("click", handleCheckClick);
 
   chrome.runtime.onMessage.addListener(handleUserMessage);
