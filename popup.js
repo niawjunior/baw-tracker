@@ -149,6 +149,59 @@ document.addEventListener("DOMContentLoaded", function () {
     window.close();
   }
 
+
+  function createRowForCoachInfo(coach, name, modifiedDate) {
+     const tr2 = document.createElement('tr');
+     tr2.classList.add('bg-white', 'border-b', 'dark:bg-gray-800', 'dark:border-gray-700');
+    
+    const span = document.createElement('span')
+    span.classList.add(
+      "bg-green-100",
+      "text-green-800",
+      "text-xs",
+      "font-medium",
+      "mr-2",
+      "px-2.5",
+      "py-0.5",
+      "rounded",
+      "dark:bg-green-900",
+      "dark:text-green-300"
+  )
+    span.textContent = coach;
+    
+     const td1 = document.createElement('td');
+     td1.classList.add('px-6', 'py-4', 'font-medium', 'text-gray-900', 'whitespace-nowrap', 'dark:text-white');
+     td1.setAttribute('scope', 'row');
+     td1.appendChild(span)
+
+     const td2 = document.createElement('td');
+
+    const spanTime = document.createElement('span')
+    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold');
+    spanTime.textContent = convertTimestamp(modifiedDate);
+
+    
+     td2.classList.add('px-6', 'py-4');
+     td2.textContent = name;  
+     td2.appendChild(spanTime);
+     tr2.appendChild(td1);
+     tr2.appendChild(td2);
+      
+     return  tr2;
+    }
+
+    function convertTimestamp(timestamp) {
+       const dateObj = new Date(timestamp);
+       const year = dateObj.getFullYear();
+       const month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+       const date = ('0' + dateObj.getDate()).slice(-2);
+       const hours = ('0' + dateObj.getHours()).slice(-2);
+       const minutes = ('0' + dateObj.getMinutes()).slice(-2);
+       const seconds = ('0' + dateObj.getSeconds()).slice(-2);
+       const formattedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+       return formattedDate;
+      }
+
   function handleCheckClick() {
     chrome.tabs.query(
       {
@@ -164,6 +217,11 @@ document.addEventListener("DOMContentLoaded", function () {
             action: "get-info",
             value: data
           })
+
+          chrome.tabs.sendMessage(tabId, {
+            action: "get-view-data"
+          })
+
         })
        
       }
@@ -171,9 +229,35 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function handleUserMessage(request, sender, sendResponse) {
-    if (request.user) {
+    if (request.type === "user") {
       var lastSavedBy = document.querySelector("#last-saved");
-      lastSavedBy.innerHTML = request.user;
+      lastSavedBy.innerHTML = request.value;
+    }
+
+    if (request.type === "coach-view-data") {
+      var numberOfView = document.querySelector("#number-of-view");
+      numberOfView.innerHTML = `<p class="text-gray-800 mt-4 text-base font-bold">Coach Views: <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">${request.value?.length}</span></p>`
+      
+    const tbody = document.querySelector("#table-content");
+    tbody.innerHTML = '';
+    
+    chrome.storage.local.get("data", (storedData) => {
+      const data = storedData.data ? JSON.parse(storedData.data) : []
+      if (!data || data.length === 0) {
+        return;
+      }
+
+      for (const obj of request.value) {
+        
+        const findUser = data.find(function (user) {
+          return user.eid === obj.modifiedBy;
+        });
+        console.log(obj)
+          const tableContent = createRowForCoachInfo(obj.CoachViewModel.header.name, findUser ? findUser.name : obj.modifiedBy, obj.modifiedDate);
+          tbody.appendChild(tableContent);
+      }
+    })
+
     }
   }
 
