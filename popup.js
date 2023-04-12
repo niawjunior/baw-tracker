@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (request.type === "coach-view-data") {
       var numberOfView = document.querySelector("#number-of-view");
-      numberOfView.innerHTML = `<p class="text-gray-800 mt-4 text-base font-bold">Coach Views: <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">${request.value?.length}</span></p>`
+      numberOfView.innerHTML = `<p class="text-gray-800 mt-4 text-base font-bold">Views: <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">${request.value?.length}</span></p>`
       
     const tbody = document.querySelector("#table-content");
     tbody.innerHTML = '';
