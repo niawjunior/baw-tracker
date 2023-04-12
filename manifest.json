@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "BAW Tracker",
-  "version": "0.0.5",
+  "version": "1.0.1",
   "description": "BAW Tracker",
   "permissions": [
     "tabs",
