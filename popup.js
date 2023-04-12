@@ -224,6 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function handleCheckClick() {
+    document.querySelector("#check-button").textContent = 'Checking..'
     chrome.tabs.query(
       {
         active: true,
@@ -326,6 +327,8 @@ document.addEventListener("DOMContentLoaded", function () {
           servicesTbody.appendChild(tableContent);
         }
       });
+
+      document.querySelector("#check-button").textContent = 'Check';
     }
   }
 
