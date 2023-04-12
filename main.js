@@ -14,7 +14,12 @@ chrome.runtime.onMessage.addListener(async (request) => {
       var mapCoachViewData = allCoachViewData.map(item => item.data);
       chrome.runtime.sendMessage({
         type: "coach-view-data",
-        value: mapCoachViewData
+        value: {
+          views: mapCoachViewData,
+          coaches: getCoach.data.COACHFLOW.items,
+          bo: getCoach.data.BusinessObject.items,
+          services: getCoach.data.SERVICEFLOW.items
+        }
       });
 
       // var currentData = await getCurrentCoachViewData(currentCoachID, containerRef)

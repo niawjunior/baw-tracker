@@ -35,8 +35,8 @@
         margin-top: 1rem;
     }
     form {
-        height: 230px;
-        max-height: 350px;
+        height: 200px;
+        max-height: 200px;
         overflow: auto;
     }
 
@@ -47,7 +47,7 @@
     .custom-font {
         font-size: 10px;
     }
-    #coach-view-container {
+    .coach-view-container {
         max-height: 200px;
         overflow: auto;
     }
@@ -55,7 +55,7 @@
 
 <body class="bg-gray-200 box-border">
     <div class="flex justify-center">
-        <h1 class="text-2xl font-bold text-center text-gray-800 py-2">
+        <h1 class="text-xl font-bold text-center text-gray-800 py-2">
             BAW Tracker
         </h1>
     </div>
@@ -71,13 +71,52 @@
             <div class="flex justify-end mb-4">
                 <span class="plus-icon text-gray-500">+</span>
             </div>
+            <div class="flex justify-end mt-4">
+                <div>
+                    <button id="apply-button" type="button"
+                        class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mr-2">Apply</button>
+                    <button id="close-button" type="button"
+                        class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Close</button>
+                </div>
+            </div>
+
             <div id="message-container"></div>
             <div id="response">
                 <p id="last-saved" class="text-gray-800 mt-4 text-base font-bold">Last saved: </p>
             </div>
+            <div class="flex justify-between mt-4">
+                <div>
+                    <button id="check-button" type="button"
+                    class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Check</button>
+                </div>
+            </div>
             <div class="bg-white">
-                <div id="number-of-view"></div>
-                <div id="coach-view-container">
+                <div>
+                    <p class="text-gray-800 mt-4 text-base font-bold">Coaches: <span id="number-of-coaches" class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">0</span></p>
+                </div>
+                <div class="coach-view-container mt-2">
+                    <div class="relative overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                            <th scope="col" class="px-6 py-3">
+                                Coach
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Info
+                            </th>
+                            </tr>
+                            </thead>
+                            <tbody id="table-coaches-content">
+                            </tbody>
+                            </table>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <p class="text-gray-800 mt-4 text-base font-bold">Views: <span id="number-of-views" class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">0</span></p>
+                </div>
+                <div class="coach-view-container mt-2">
                     <div class="relative overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -86,28 +125,64 @@
                                 View
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Last Saved
+                                Info
                             </th>
                             </tr>
                             </thead>
-                            <tbody id="table-content">
+                            <tbody id="table-views-content">
                             </tbody>
                             </table>
                     </div>
                 </div>
-            </div>
-            <div class="flex justify-between mt-4">
-                <div>
-                    <button id="check-button" type="button"
-                    class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Check</button>
+
+
+
+                
+                <div class="mt-2">
+                    <p class="text-gray-800 mt-4 text-base font-bold">Business Object: <span id="number-of-bo" class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">0</span></p>
                 </div>
-                <div>
-                    <button id="apply-button" type="button"
-                        class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mr-2">Apply</button>
-                    <button id="close-button" type="button"
-                        class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Close</button>
+                <div class="coach-view-container mt-2">
+                    <div class="relative overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                            <th scope="col" class="px-6 py-3">
+                                BO
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Info
+                            </th>
+                            </tr>
+                            </thead>
+                            <tbody id="table-bo-content">
+                            </tbody>
+                            </table>
+                    </div>
                 </div>
+                <div class="mt-2">
+                    <p class="text-gray-800 mt-4 text-base font-bold">Services: <span id="number-of-services" class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">0</span></p>
+                </div>
+                <div class="coach-view-container mt-2">
+                    <div class="relative overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                            <th scope="col" class="px-6 py-3">
+                                Service
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Info
+                            </th>
+                            </tr>
+                            </thead>
+                            <tbody id="table-services-content">
+                            </tbody>
+                            </table>
+                    </div>
+                </div>
+
             </div>
+            
            
         </div>
         <div class="footer">

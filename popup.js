@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
 
-  function createRowForCoachInfo(coach, name, modifiedDate) {
+  function createRowForCoachInfo(title, name, modifiedDate) {
      const tr2 = document.createElement('tr');
      tr2.classList.add('bg-white', 'border-b', 'dark:bg-gray-800', 'dark:border-gray-700');
     
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "dark:bg-green-900",
       "dark:text-green-300"
   )
-    span.textContent = coach;
+    span.textContent = title;
     
      const td1 = document.createElement('td');
      td1.classList.add('px-6', 'py-4', 'font-medium', 'text-gray-900', 'whitespace-nowrap', 'dark:text-white');
@@ -178,12 +178,16 @@ document.addEventListener("DOMContentLoaded", function () {
      const td2 = document.createElement('td');
 
     const spanTime = document.createElement('span')
-    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold', 'custom-font', 'ml-2');
+    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold', 'custom-font');
     spanTime.textContent = `(${convertTimestamp(modifiedDate)})`;
 
     
      td2.classList.add('px-6', 'py-4', 'custom-column');
-     td2.textContent = name;  
+    const spanText = document.createElement('span');
+    spanText.textContent = name;
+    spanText.classList.add('mr-2', 'font-medium');
+    
+     td2.appendChild(spanText);  
      td2.appendChild(spanTime);
      tr2.appendChild(td1);
      tr2.appendChild(td2);
@@ -236,11 +240,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (request.type === "coach-view-data") {
-      var numberOfView = document.querySelector("#number-of-view");
-      numberOfView.innerHTML = `<p class="text-gray-800 mt-4 text-base font-bold">Views: <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">${request.value?.length}</span></p>`
-      
-    const tbody = document.querySelector("#table-content");
-    tbody.innerHTML = '';
+      var numberOfViews = document.querySelector("#number-of-views");
+      var numberOfCoaches = document.querySelector("#number-of-coaches");
+      var numberOfBo = document.querySelector("#number-of-bo");
+      var numberOfServices = document.querySelector("#number-of-services");
+
+      numberOfCoaches.textContent = request.value.coaches?.length
+      numberOfViews.textContent = request.value.views?.length
+      numberOfBo.textContent = request.value.bo?.length
+      numberOfServices.textContent = request.value.services?.length
+
+      const viewsTbody = document.querySelector("#table-views-content");
+      const coachesTbody = document.querySelector("#table-coaches-content");
+      const boTbody = document.querySelector("#table-bo-content");
+      const servicesTbody = document.querySelector("#table-services-content");
+
+      coachesTbody.innerHTML = '';
+      viewsTbody.innerHTML = '';
     
     chrome.storage.local.get("data", (storedData) => {
       const data = storedData.data ? JSON.parse(storedData.data) : []
@@ -248,15 +264,42 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      for (const obj of request.value) {
+      for (const obj of request.value.coaches) {
         
         const findUser = data.find(function (user) {
           return user.eid === obj.modifiedBy;
         });
-        console.log(obj)
-          const tableContent = createRowForCoachInfo(obj.CoachViewModel.header.name, findUser ? findUser.name : obj.modifiedBy, obj.modifiedDate);
-          tbody.appendChild(tableContent);
+          const tableContent = createRowForCoachInfo(obj.name, findUser ? findUser.name : obj.modifiedBy, obj.modifiedOn);
+          coachesTbody.appendChild(tableContent);
       }
+
+      for (const obj of request.value.views) {
+        
+        const findUser = data.find(function (user) {
+          return user.eid === obj.modifiedBy;
+        });
+          const tableContent = createRowForCoachInfo(obj.CoachViewModel.header.name, findUser ? findUser.name : obj.modifiedBy, obj.modifiedDate);
+          viewsTbody.appendChild(tableContent);
+      }
+
+      for (const obj of request.value.bo) {
+        
+        const findUser = data.find(function (user) {
+          return user.eid === obj.modifiedBy;
+        });
+          const tableContent = createRowForCoachInfo(obj.name, findUser ? findUser.name : obj.modifiedBy, obj.modifiedOn);
+          boTbody.appendChild(tableContent);
+      }
+
+      for (const obj of request.value.services) {
+        
+        const findUser = data.find(function (user) {
+          return user.eid === obj.modifiedBy;
+        });
+          const tableContent = createRowForCoachInfo(obj.name, findUser ? findUser.name : obj.modifiedBy, obj.modifiedOn);
+          servicesTbody.appendChild(tableContent);
+      }
+
     })
 
     }
