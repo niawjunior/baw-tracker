@@ -3,29 +3,24 @@ chrome.runtime.onMessage.addListener(async (request) => {
     var params = new URLSearchParams(document.location.search);
     var containerRef = params.get("containerRef");
 
-      var getCoach = await getCoachID(containerRef)
-      // var currentView = document.querySelector('#editorDropdown > tbody > tr > td.dijitReset.dijitStretch.dijitButtonContents > div.dijitReset.dijitInputField.dijitButtonText.editorDropDownLabel > span').textContent;
-      // var currentCoachID = getCoach.data.CoachView.items.find(item => item.name === currentView).poId
-      var allCoachViewID = getCoach.data.CoachView.items.map(item => item.poId);
+    var getCoach = await getCoachID(containerRef);
+    var allCoachViewID = getCoach.data.CoachView.items.map((item) => item.poId);
 
-      var allCoachViewData = await Promise.all(allCoachViewID.map(async (id) => {
+    var allCoachViewData = await Promise.all(
+      allCoachViewID.map(async (id) => {
         return await getCurrentCoachViewData(id, containerRef);
-      }))
-      var mapCoachViewData = allCoachViewData.map(item => item.data);
-      chrome.runtime.sendMessage({
-        type: "coach-view-data",
-        value: {
-          views: mapCoachViewData,
-          coaches: getCoach.data.COACHFLOW.items,
-          bo: getCoach.data.BusinessObject.items,
-          services: getCoach.data.SERVICEFLOW.items
-        }
-      });
-
-      // var currentData = await getCurrentCoachViewData(currentCoachID, containerRef)
-
-      // var result = currentData.data.CoachViewModel.inlineScript;
-      // var jsScript = result.find(item => item.scriptType === "JS").scriptBlock
+      })
+    );
+    var mapCoachViewData = allCoachViewData.map((item) => item.data);
+    chrome.runtime.sendMessage({
+      type: "coach-view-data",
+      value: {
+        views: mapCoachViewData,
+        coaches: getCoach.data.COACHFLOW.items,
+        bo: getCoach.data.BusinessObject.items,
+        services: getCoach.data.SERVICEFLOW.items,
+      },
+    });
   }
   if (request.action === "get-info") {
     const editingInfo = document.querySelector("#editingInfo");
@@ -35,7 +30,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
       const user = editingInfo.innerHTML.replace(/by.*/, `by ${currentUser}`);
       chrome.runtime.sendMessage({
         type: "user",
-        value: user
+        value: user,
       });
     }
     const userPresenceDialog = document.querySelector("#userPresenceDialog");
@@ -43,64 +38,72 @@ chrome.runtime.onMessage.addListener(async (request) => {
       const users = userPresenceDialog.querySelectorAll(
         "div > div > div > div > span"
       );
-        const data = request.value;
-        users.forEach((user) => {
-          const eid = user.innerHTML;
-          const findName = data.find((item) => item.eid === eid);
-          if (findName) {
-            user.innerHTML = `${eid} (${findName.name})`;
-          }
-        });
+      const data = request.value;
+      users.forEach((user) => {
+        const eid = user.innerHTML;
+        const findName = data.find((item) => item.eid === eid);
+        if (findName) {
+          user.innerHTML = `${eid} (${findName.name})`;
+        }
+      });
     }
   }
 });
 
-async function getCurrentCoachViewData (coachView, containerRef) {
-  return fetch(`https://${window.location.host}/rest/bpm/wle/pd/v1/coachview/${coachView}?containerRef=${containerRef}&avoidBasicAuthChallenge=true`, {
-    "headers": {
-      "accept": "application/json",
-      "accept-language": "en",
-      "content-type": "application/x-www-form-urlencoded",
-      "sec-ch-ua": "\"Google Chrome\";v=\"111\", \"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"111\"",
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Windows\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "x-requested-with": "XMLHttpRequest"
-    },
-    "referrer": `https://${window.location.host}/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
-    "referrerPolicy": "strict-origin-when-cross-origin",
-    "body": null,
-    "method": "GET",
-    "mode": "cors",
-    "credentials": "include"
-  }).then(res => res.json())
+async function getCurrentCoachViewData(coachView, containerRef) {
+  return fetch(
+    `https://${window.location.host}/rest/bpm/wle/pd/v1/coachview/${coachView}?containerRef=${containerRef}&avoidBasicAuthChallenge=true`,
+    {
+      headers: {
+        accept: "application/json",
+        "accept-language": "en",
+        "content-type": "application/x-www-form-urlencoded",
+        "sec-ch-ua":
+          '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-requested-with": "XMLHttpRequest",
+      },
+      referrer: `https://${window.location.host}/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
+      referrerPolicy: "strict-origin-when-cross-origin",
+      body: null,
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    }
+  ).then((res) => res.json());
 }
-async function getCoachID (containerRef) {
+async function getCoachID(containerRef) {
   var params = new URLSearchParams(document.location.search);
   var containerRef = params.get("containerRef");
 
-return fetch(`https://${window.location.host}/rest/bpm/wle/pd/v1/assets?containerRef=${containerRef}&avoidBasicAuthChallenge=true`, {
-"headers": {
-  "accept": "application/json",
-  "accept-language": "en",
-  "content-type": "application/x-www-form-urlencoded",
-  "sec-ch-ua": "\"Google Chrome\";v=\"111\", \"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"111\"",
-  "sec-ch-ua-mobile": "?0",
-  "sec-ch-ua-platform": "\"Windows\"",
-  "sec-fetch-dest": "empty",
-  "sec-fetch-mode": "cors",
-  "sec-fetch-site": "same-origin",
-  "x-requested-with": "XMLHttpRequest"
-},
-"referrer": `https://${window.location.host}/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
-"referrerPolicy": "strict-origin-when-cross-origin",
-"body": null,
-"method": "GET",
-"mode": "cors",
-"credentials": "include"
-}).then(result => result.json())  
+  return fetch(
+    `https://${window.location.host}/rest/bpm/wle/pd/v1/assets?containerRef=${containerRef}&avoidBasicAuthChallenge=true`,
+    {
+      headers: {
+        accept: "application/json",
+        "accept-language": "en",
+        "content-type": "application/x-www-form-urlencoded",
+        "sec-ch-ua":
+          '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-requested-with": "XMLHttpRequest",
+      },
+      referrer: `https://${window.location.host}/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
+      referrerPolicy: "strict-origin-when-cross-origin",
+      body: null,
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    }
+  ).then((result) => result.json());
 }
 
 function getEidFromEditingInfo(editingInfo) {
@@ -114,7 +117,7 @@ function getCurrentUser(eid, data) {
   const findName = data.find((item) => item.eid === eid);
   if (findName) {
     return findName.name;
-  } else if (eid === 'you') {
+  } else if (eid === "you") {
     return you.replace(".", ", ");
   } else {
     return eid;
