@@ -177,11 +177,11 @@ document.addEventListener("DOMContentLoaded", function () {
      const td2 = document.createElement('td');
 
     const spanTime = document.createElement('span')
-    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold');
+    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold', 'custom-font');
     spanTime.textContent = convertTimestamp(modifiedDate);
 
     
-     td2.classList.add('px-6', 'py-4');
+     td2.classList.add('px-6', 'py-4', 'custom-column');
      td2.textContent = name;  
      td2.appendChild(spanTime);
      tr2.appendChild(td1);
