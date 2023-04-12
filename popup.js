@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   applyButton.addEventListener("click", function () {
     const rows = document.querySelectorAll("#row-container .row");
+    messageContainer.innerHTML = '';
     const data = validateData(rows);
 
     if (data) {
@@ -177,8 +178,8 @@ document.addEventListener("DOMContentLoaded", function () {
      const td2 = document.createElement('td');
 
     const spanTime = document.createElement('span')
-    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold', 'custom-font');
-    spanTime.textContent = convertTimestamp(modifiedDate);
+    spanTime.classList.add('px-6', 'py-4', 'inline-table', 'font-bold', 'custom-font', 'ml-2');
+    spanTime.textContent = `(${convertTimestamp(modifiedDate)})`;
 
     
      td2.classList.add('px-6', 'py-4', 'custom-column');

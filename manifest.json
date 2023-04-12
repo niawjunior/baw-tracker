@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "BAW Name Checker",
+  "name": "BAW Tracker",
   "version": "1.0",
-  "description": "BAW Name Checker",
+  "description": "BAW Tracker",
   "permissions": [
     "tabs",
     "activeTab",
@@ -14,7 +14,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "BAW Name Checker",
+    "default_title": "BAW Tracker",
     "default_icon": {
       "16": "icons/editor-icon16.png"
     }
