@@ -51,7 +51,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
 });
 
 async function getCurrentCoachViewData (coachView, containerRef) {
-  return fetch(`https://wf-baw-dev.edp-content-preprod.aws-int.thomsonreuters.com/rest/bpm/wle/pd/v1/coachview/${coachView}?containerRef=${containerRef}&avoidBasicAuthChallenge=true`, {
+  return fetch(`https://${window.location.host}/rest/bpm/wle/pd/v1/coachview/${coachView}?containerRef=${containerRef}&avoidBasicAuthChallenge=true`, {
     "headers": {
       "accept": "application/json",
       "accept-language": "en",
@@ -64,7 +64,7 @@ async function getCurrentCoachViewData (coachView, containerRef) {
       "sec-fetch-site": "same-origin",
       "x-requested-with": "XMLHttpRequest"
     },
-    "referrer": `https://wf-baw-dev.edp-content-preprod.aws-int.thomsonreuters.com/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
+    "referrer": `https://${window.location.host}/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
     "referrerPolicy": "strict-origin-when-cross-origin",
     "body": null,
     "method": "GET",
@@ -76,7 +76,7 @@ async function getCoachID (containerRef) {
   var params = new URLSearchParams(document.location.search);
   var containerRef = params.get("containerRef");
 
-return fetch(`https://wf-baw-dev.edp-content-preprod.aws-int.thomsonreuters.com/rest/bpm/wle/pd/v1/assets?containerRef=${containerRef}&avoidBasicAuthChallenge=true`, {
+return fetch(`https://${window.location.host}/rest/bpm/wle/pd/v1/assets?containerRef=${containerRef}&avoidBasicAuthChallenge=true`, {
 "headers": {
   "accept": "application/json",
   "accept-language": "en",
@@ -89,7 +89,7 @@ return fetch(`https://wf-baw-dev.edp-content-preprod.aws-int.thomsonreuters.com/
   "sec-fetch-site": "same-origin",
   "x-requested-with": "XMLHttpRequest"
 },
-"referrer": `https://wf-baw-dev.edp-content-preprod.aws-int.thomsonreuters.com/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
+"referrer": `https://${window.location.host}/WebPD/jsp/bootstrap.jsp?containerRef=${containerRef}&WorkflowCenter=/processapps/toolkits/localRepo?BAW=true&BAW_tWAS=true&filterBy=all&sortAsc=false&sortBy=recently_updated`,
 "referrerPolicy": "strict-origin-when-cross-origin",
 "body": null,
 "method": "GET",
