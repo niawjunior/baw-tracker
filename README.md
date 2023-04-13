@@ -1,4 +1,8 @@
-![alt text](demo.png)
+![alt text](path-finder.PNG)
+![alt text](path-finder2.PNG)
+![alt text](name-mapping.PNG)
+![alt text](info.PNG)
+
 
 # List of the features
 
