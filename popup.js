@@ -214,6 +214,53 @@ document.addEventListener("DOMContentLoaded", function () {
     return tr2;
   }
 
+
+
+  
+  function createRowForPath(path) {
+    const tr2 = document.createElement("tr");
+    tr2.classList.add(
+      "bg-white",
+      "border-b",
+      "dark:bg-gray-800",
+      "dark:border-gray-700"
+    );
+
+    const span = document.createElement("span");
+    span.classList.add(
+      "bg-green-100",
+      "text-green-800",
+      "text-xs",
+      "font-medium",
+      "mr-2",
+      "px-2.5",
+      "py-0.5",
+      "rounded",
+      "dark:bg-green-900",
+      "dark:text-green-300"
+    );
+    span.textContent = path;
+    
+    const td1 = document.createElement("td");
+
+    td1.classList.add(
+      "px-6",
+      "py-4",
+      "font-medium",
+      "text-gray-900",
+      "whitespace-nowrap",
+      "dark:text-white"
+    );
+    td1.setAttribute("scope", "row");
+    td1.appendChild(span);
+
+
+    tr2.appendChild(td1);
+    return tr2;
+  }
+
+
+
   function convertTimestamp(timestamp) {
     const dateObj = new Date(timestamp);
     const year = dateObj.getFullYear();
@@ -226,8 +273,35 @@ document.addEventListener("DOMContentLoaded", function () {
     return formattedDate;
   }
 
+  function handleSearchClick(e) {
+    e.preventDefault();
+    var input = document.querySelector("#search").value;
+    
+    if (input) {
+      document.querySelector("#search-button").textContent = 'Loading..';
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        function (tabs) {
+          var tabId = tabs[0].id;
+            chrome.tabs.sendMessage(tabId, {
+              action: "get-path",
+              value: input,
+            }).catch(() => {
+              document.querySelector("#search-button").textContent = 'Search';
+            })
+  
+        }
+      );
+    }
+
+
+
+  }
   function handleCheckClick() {
-    document.querySelector("#check-button").textContent = 'Checking..'
+    document.querySelector("#check-button").textContent = 'Loading..'
     chrome.tabs.query(
       {
         active: true,
@@ -239,25 +313,35 @@ document.addEventListener("DOMContentLoaded", function () {
         chrome.storage.local.get("data", (storedData) => {
           const data = storedData.data ? JSON.parse(storedData.data) : [];
           chrome.tabs.sendMessage(tabId, {
-            action: "get-info",
+            action: "get-last-saved",
             value: data,
-          });
+          }).catch(() => {
+            document.querySelector("#check-button").textContent = 'Get Information';
+            document.querySelector("#get-info-error").textContent = 'Please reload extension or BAW and try again.';
+          })
 
           chrome.tabs.sendMessage(tabId, {
             action: "get-view-data",
-          });
+          }).catch(() => {
+            document.querySelector("#check-button").textContent = 'Get Information';
+            document.querySelector("#get-info-error").textContent = 'Please reload extension or and try BAW again.';
+
+          })
         });
       }
     );
   }
 
   function handleUserMessage(request, sender, sendResponse) {
-    if (request.type === "user") {
+    if (request.type === "get-last-saved") {
       var lastSavedBy = document.querySelector("#last-saved");
-      lastSavedBy.innerHTML = request.value;
+      lastSavedBy.textContent = request.value.modifiedBy;
+
+      var currentPage = document.querySelector("#current-page");
+      currentPage.textContent = request.value.currentPage;
     }
 
-    if (request.type === "coach-view-data") {
+    if (request.type === "get-view-data") {
       var numberOfViews = document.querySelector("#number-of-views");
       var numberOfCoaches = document.querySelector("#number-of-coaches");
       var numberOfBo = document.querySelector("#number-of-bo");
@@ -275,7 +359,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       coachesTbody.innerHTML = "";
       viewsTbody.innerHTML = "";
-
+      boTbody.innerHTML = "";
+      servicesTbody.innerHTML = "";
+      
       chrome.storage.local.get("data", (storedData) => {
         const data = storedData.data ? JSON.parse(storedData.data) : [];
 
@@ -328,7 +414,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
-      document.querySelector("#check-button").textContent = 'Check';
+      document.querySelector("#check-button").textContent = 'Get Information';
+      document.querySelector("#get-info-error").textContent = ''
+
+    }
+
+    if (request.type === "get-path") {
+      document.querySelector("#search-button").textContent = 'Search';
+      const functionsTbody = document.querySelector("#table-functions-path");
+      const controlIdsTbody = document.querySelector("#table-controlIDs-path");
+      
+      document.querySelector("#number-of-functions").textContent = request.value.functions?.length
+      document.querySelector("#number-of-controlIds").textContent = request.value.controlIds?.length
+     
+      controlIdsTbody.innerHTML = ""
+      functionsTbody.innerHTML = ""
+      
+      for (const obj of request.value.functions) {
+        const tableContent = createRowForPath(
+          obj.path
+        );
+
+        functionsTbody.appendChild(tableContent);
+      }
+
+      for (const obj of request.value.controlIds) {
+        const tableContent = createRowForPath(
+          obj
+        );
+
+        controlIdsTbody.appendChild(tableContent);
+      }
+      
     }
   }
   
@@ -367,5 +484,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const checkButton = document.querySelector("#check-button");
   checkButton.addEventListener("click", handleCheckClick);
 
+
+  const searchButton = document.querySelector("#search-button");
+  searchButton.addEventListener("click", handleSearchClick);
+
+  
   chrome.runtime.onMessage.addListener(handleUserMessage);
 });

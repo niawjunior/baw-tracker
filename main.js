@@ -1,11 +1,12 @@
-chrome.runtime.onMessage.addListener(async (request) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  var params = new URLSearchParams(document.location.search);
+  var containerRef = params.get("containerRef");
+  console.log(request)
   if (request.action === "get-view-data") {
-    var params = new URLSearchParams(document.location.search);
-    var containerRef = params.get("containerRef");
 
     var getCoach = await getCoachID(containerRef);
     var allCoachViewID = getCoach.data.CoachView.items.map((item) => item.poId);
-
+    
     var allCoachViewData = await Promise.all(
       allCoachViewID.map(async (id) => {
         return await getCurrentCoachViewData(id, containerRef);
@@ -13,7 +14,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
     );
     var mapCoachViewData = allCoachViewData.map((item) => item.data);
     chrome.runtime.sendMessage({
-      type: "coach-view-data",
+      type: "get-view-data",
       value: {
         views: mapCoachViewData,
         coaches: getCoach.data.COACHFLOW.items,
@@ -21,17 +22,27 @@ chrome.runtime.onMessage.addListener(async (request) => {
         services: getCoach.data.SERVICEFLOW.items,
       },
     });
+    sendResponse({
+      received: true
+  });
   }
-  if (request.action === "get-info") {
+  if (request.action === "get-last-saved") {
     const editingInfo = document.querySelector("#editingInfo");
     if (editingInfo) {
       const eid = getEidFromEditingInfo(editingInfo);
       const currentUser = getCurrentUser(eid, request.value);
-      const user = editingInfo.innerHTML.replace(/by.*/, `by ${currentUser}`);
+      const user = editingInfo.innerHTML.replace(/Last saved/, '').replace(/by.*/,`by ${currentUser}`);
+      var currentPage = document.querySelector("#editorDropdown > tbody > tr > td.dijitReset.dijitStretch.dijitButtonContents > div.dijitReset.dijitInputField.dijitButtonText.editorDropDownLabel > span")?.textContent
       chrome.runtime.sendMessage({
-        type: "user",
-        value: user,
+        type: "get-last-saved",
+        value: {
+          currentPage: currentPage,
+          modifiedBy: user
+        },
       });
+      sendResponse({
+        received: true
+    });
     }
     const userPresenceDialog = document.querySelector("#userPresenceDialog");
     if (userPresenceDialog) {
@@ -47,6 +58,110 @@ chrome.runtime.onMessage.addListener(async (request) => {
         }
       });
     }
+  }
+
+  function findElement(el, layoutItemId) {
+     const results = [];
+    
+     function search(el, parentPath) {
+       if (!el || !Array.isArray(el)) return;
+    
+       for (let i = 0; i < el.length; i++) {
+         const item = el[i];
+         const layout = item.CoachViewModel?.layout;
+         const header = item.CoachViewModel?.header;
+         const layoutItem = layout?.layoutItem;
+    
+         let path = parentPath;
+    
+         if (header?.name) {
+           path = path ? `${path}/${header.name}` : `${header.name}`;
+         }
+    
+         if (layoutItem) {
+           for (let j = 0; j < layoutItem.length; j++) {
+             const li = layoutItem[j];
+    
+             if (li.layoutItemId === layoutItemId) {
+               results.push(path ? `${path}/${layoutItemId}` : `view/${layoutItemId}`);
+             }
+    
+             const contentBoxContrib = li.contentBoxContrib;
+    
+             if (contentBoxContrib) {
+               for (let k = 0; k < contentBoxContrib.length; k++) {
+                 const cb = contentBoxContrib[k];
+                 const contributions = cb.contributions;
+                 const contentBoxId = cb.contentBoxId;
+    
+                 if (contributions) {
+                   for (let l = 0; l < contributions.length; l++) {
+                     const contrib = contributions[l];
+                     const contribLayoutItemId = contrib.layoutItemId;
+    
+                     if (contribLayoutItemId === layoutItemId) {
+                       results.push(`${path}/${li.layoutItemId}/${contentBoxId}/${layoutItemId}`);
+                     }
+                   }
+                 }
+               }
+             }
+    
+             search(li.layoutItem, path ? `${path}/${li.layoutItemId}` : `${li.layoutItemId}`);
+           }
+         }
+       }
+     }
+    
+     search(el, '');
+    
+     return results;
+    }
+
+
+  function searchFunction(functionName, str) {
+     // Create a regular expression to search for the function name
+     const regex = new RegExp(`\\.${functionName}\\s*=\\s*function\\(`);
+    
+     // Use the regular expression to search for the function name in the string
+     return regex.test(str);
+    }
+
+
+  if (request.action === "get-path") {
+    var getCoach = await getCoachID(containerRef);
+    var allCoachViewID = getCoach.data.CoachView.items.map((item) => item.poId);
+    
+    var allCoachViewData = await Promise.all(
+      allCoachViewID.map(async (id) => {
+        return await getCurrentCoachViewData(id, containerRef);
+      })
+    );
+    var mapCoachViewData = allCoachViewData.map((item) => item.data);
+
+    var findElementByControlID = findElement(mapCoachViewData, request.value.trim());
+
+    var allInlineJS = mapCoachViewData.map(item => {
+      return {
+        path: item.CoachViewModel.header.name,
+        script: item.CoachViewModel.inlineScript.find(v => v.scriptType === "JS").scriptBlock,
+      }
+    });
+    var filterMatchFunction = allInlineJS.filter(item => {
+      return searchFunction(request.value.trim(), item.script)
+    })
+
+    chrome.runtime.sendMessage({
+      type: "get-path",
+      value: {
+        functions: filterMatchFunction,
+        controlIds: findElementByControlID
+      },
+    });
+    
+    sendResponse({
+      received: true
+  });
   }
 });
 
