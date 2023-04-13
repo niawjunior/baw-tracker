@@ -1,7 +1,6 @@
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   var params = new URLSearchParams(document.location.search);
   var containerRef = params.get("containerRef");
-  console.log(request)
   if (request.action === "get-view-data") {
 
     var getCoach = await getCoachID(containerRef);
