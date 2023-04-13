@@ -4,7 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!data || data.length === 0) {
       return;
     }
+    preloadEids(data);
+  });
 
+  function preloadEids(data) {
     const rowContainer = document.getElementById("row-container");
     for (const obj of data) {
       if (obj.eid && obj.name) {
@@ -14,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setupDeleteButtons();
-  });
+  }
 
   const addButton = document.querySelector(".plus-icon");
   const rowContainer = document.querySelector("#row-container");
@@ -275,9 +278,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       chrome.storage.local.get("data", (storedData) => {
         const data = storedData.data ? JSON.parse(storedData.data) : [];
-        if (!data || data.length === 0) {
-          return;
-        }
 
         for (const obj of request.value.coaches) {
           const findUser = data.find(function (user) {
@@ -331,6 +331,35 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelector("#check-button").textContent = 'Check';
     }
   }
+  
+  function exportJSON() {
+     chrome.storage.local.get('data', function(result) {
+       var jsonData = result.data;
+       var blob = new Blob([jsonData], { type: 'application/json' });
+       var url = URL.createObjectURL(blob);
+           chrome.downloads.download({
+         url: url,
+         filename: 'data.json'
+       }, function() {
+         URL.revokeObjectURL(url);
+       });
+     });
+    }
+
+  function handleFileChange(evt) {
+    var file = evt.target.files[0];
+    var reader = new FileReader();
+    messageContainer.innerHTML = "";
+    reader.onload = function(event) {
+      var jsonData = JSON.parse(event.target.result);
+      preloadEids(jsonData);
+    }
+    reader.readAsText(file);
+  }
+  document.querySelector("#file-input").addEventListener('change', handleFileChange)
+
+  const exportButton = document.querySelector("#export-button");
+  exportButton.addEventListener("click", exportJSON);
 
   const closeButton = document.querySelector("#close-button");
   closeButton.addEventListener("click", handleCloseClick);

@@ -35,7 +35,6 @@
         margin-top: 1rem;
     }
     form {
-        height: 200px;
         max-height: 200px;
         overflow: auto;
     }
@@ -71,6 +70,17 @@
             <div class="flex justify-end mb-4">
                 <span class="plus-icon text-gray-500">+</span>
             </div>
+            <button id="export-button" type="button" class="block mb-4 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 mr-2">Export EIDs</button>
+                  <label class=" text-sm font-medium text-gray-900 dark:text-white ">Upload EIDs (JSON)</label>    
+                  <p class="block mt-2">
+                    <span class="block text-sm font-medium text-gray-900 dark:text-white">Example</span>
+                    [{
+                        eid: 99999,
+                        name: "John"
+                    }]
+                  </pre>              
+<input class="mt-2 block text-sm text-gray-900" id="file-input" type="file">
+
             <div class="flex justify-end mt-4">
                 <div>
                     <button id="apply-button" type="button"
@@ -102,7 +112,7 @@
                             <th scope="col" class="px-6 py-3">
                                 Coach
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="px-6 py-3 text-right">
                                 Info
                             </th>
                             </tr>
@@ -124,7 +134,7 @@
                             <th scope="col" class="px-6 py-3">
                                 View
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="px-6 py-3 text-right">
                                 Info
                             </th>
                             </tr>
@@ -145,7 +155,7 @@
                             <th scope="col" class="px-6 py-3">
                                 BO
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="px-6 py-3 text-right">
                                 Info
                             </th>
                             </tr>
@@ -166,7 +176,7 @@
                             <th scope="col" class="px-6 py-3">
                                 Service
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="px-6 py-3 text-right">
                                 Info
                             </th>
                             </tr>
