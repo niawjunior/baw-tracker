@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
             action: "get-view-data",
           }).catch(() => {
             document.querySelector("#check-button").textContent = 'Get Information';
-            document.querySelector("#get-info-error").textContent = 'Please reload extension or and try BAW again.';
+            document.querySelector("#get-info-error").textContent = 'Please reload extension or BAW and try again.';
 
           })
         });
