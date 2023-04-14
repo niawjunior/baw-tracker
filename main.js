@@ -137,7 +137,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       })
     );
     var mapCoachViewData = allCoachViewData.map((item) => item.data);
-
+    console.log(mapCoachViewData)
     var findElementByControlID = findElement(mapCoachViewData, request.value.trim());
 
     var allInlineJS = mapCoachViewData.map(item => {

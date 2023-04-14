@@ -1,0 +1,65 @@
+[{
+    "CoachViewModel": {
+        "layout": {
+            "layoutItem": [
+                {
+                    "contentBoxContrib": [
+                        {
+                            "contributions": [
+                                {
+                                    "contentBoxContrib": [
+                                        {
+                                            "contributions": [
+                                                {
+                                                    "layoutItemId": "Text1",
+                                                }
+                                            ],
+                                            "contentBoxId": "ContentBox1",
+                                        }
+                                    ],
+                                    "layoutItemId": "Vertical_Layout1",
+                                },
+                                {
+                                    "contentBoxContrib": [
+                                        {
+                                            "contributions": [
+                                                {
+                                                    "layoutItemId": "Date_Time_Picker1",
+                                                }
+                                            ],
+                                            "contentBoxId": "ContentBox1",
+                                            "id": "be887fdb-3697-44b3-8917-d51be6e3cfe3"
+                                        }
+                                    ],
+                                    "layoutItemId": "Vertical_Layout2",
+                                }
+                            ],
+                            "contentBoxId": "ContentBox1",
+                        }
+                    ],
+                    "layoutItemId": "Vertical_Layout3",
+                },
+                {
+                    "contentBoxContrib": [
+                        {
+                            "contributions": [
+                                {
+                                    "layoutItemId": "Button1",
+                                },
+                                {
+                                    "layoutItemId": "Button2"
+                                   
+                                }
+                            ],
+                            "contentBoxId": "ContentBox1",
+                        }
+                    ],
+                    "layoutItemId": "Horizontal_Layout1",
+                }
+            ]
+        },
+        "header": {
+            "name": "CTS11HighligterMenu"
+        }
+    }
+}]
