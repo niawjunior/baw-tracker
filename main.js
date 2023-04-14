@@ -62,6 +62,29 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   function findElement(el, layoutItemId) {
      const results = [];
     
+       function findContributions(data, path) {
+         for (let i = 0; i < data.length; i++) {
+           const contributions = data[i].contributions;
+           if (contributions) {
+               for (let l = 0; l < contributions.length; l++) {
+                   const contrib = contributions[l];
+                   const contribLayoutItemId = contrib.layoutItemId;
+                   const nestedContentBoxContrib = contrib.contentBoxContrib;
+    
+                   if (contribLayoutItemId === layoutItemId) {
+                       results.push(`${path}/${contribLayoutItemId}`);
+                   }
+    
+               if (nestedContentBoxContrib) {
+                 search(
+                   nestedContentBoxContrib,
+                   `${path}/${contrib.layoutItemId}`
+                 );
+               }
+             }
+           }
+         }
+       }
      function search(el, parentPath) {
        if (!el || !Array.isArray(el)) return;
     
@@ -72,17 +95,14 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
          const layoutItem = layout?.layoutItem;
     
          let path = parentPath;
-    
          if (header?.name) {
            path = path ? `${path}/${header.name}` : `${header.name}`;
          }
-    
          if (layoutItem) {
            for (let j = 0; j < layoutItem.length; j++) {
              const li = layoutItem[j];
-    
              if (li.layoutItemId === layoutItemId) {
-               results.push(path ? `${path}/${layoutItemId}` : `view/${layoutItemId}`);
+               results.push(`${path}/${layoutItemId}`);
              }
     
              const contentBoxContrib = li.contentBoxContrib;
@@ -91,33 +111,42 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                for (let k = 0; k < contentBoxContrib.length; k++) {
                  const cb = contentBoxContrib[k];
                  const contributions = cb.contributions;
-                 const contentBoxId = cb.contentBoxId;
-    
                  if (contributions) {
                    for (let l = 0; l < contributions.length; l++) {
                      const contrib = contributions[l];
                      const contribLayoutItemId = contrib.layoutItemId;
-    
+                     const nestedContentBoxContrib = contrib.contentBoxContrib;
                      if (contribLayoutItemId === layoutItemId) {
-                       results.push(`${path}/${li.layoutItemId}/${contentBoxId}/${layoutItemId}`);
+                       results.push(`${path}/${li.layoutItemId}/${layoutItemId}`);
+                     }
+    
+                     if (nestedContentBoxContrib) {
+                       search(
+                         nestedContentBoxContrib,
+                         `${path}/${li.layoutItemId}/${contribLayoutItemId}`
+                       );
                      }
                    }
                  }
                }
              }
     
-             search(li.layoutItem, path ? `${path}/${li.layoutItemId}` : `${li.layoutItemId}`);
+             search(
+               li.layoutItem,
+               path ? `${path}/${li.layoutItemId}` : `${li.layoutItemId}`
+             );
            }
+         } else {
+           findContributions(el, path)
          }
        }
      }
     
-     search(el, '');
+     search(el, "");
     
      return results;
     }
-
-
+    
   function searchFunction(functionName, str) {
      // Create a regular expression to search for the function name
      const regex = new RegExp(`\\.${functionName}\\s*=\\s*function\\(`);
@@ -137,7 +166,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       })
     );
     var mapCoachViewData = allCoachViewData.map((item) => item.data);
-    console.log(mapCoachViewData)
     var findElementByControlID = findElement(mapCoachViewData, request.value.trim());
 
     var allInlineJS = mapCoachViewData.map(item => {
