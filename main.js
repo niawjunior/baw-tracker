@@ -2,10 +2,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   var params = new URLSearchParams(document.location.search);
   var containerRef = params.get("containerRef");
   if (request.action === "get-view-data") {
-
     var getCoach = await getCoachID(containerRef);
     var allCoachViewID = getCoach.data.CoachView.items.map((item) => item.poId);
-    
+
     var allCoachViewData = await Promise.all(
       allCoachViewID.map(async (id) => {
         return await getCurrentCoachViewData(id, containerRef);
@@ -22,26 +21,30 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       },
     });
     sendResponse({
-      received: true
-  });
+      received: true,
+    });
   }
   if (request.action === "get-last-saved") {
     const editingInfo = document.querySelector("#editingInfo");
     if (editingInfo) {
       const eid = getEidFromEditingInfo(editingInfo);
       const currentUser = getCurrentUser(eid, request.value);
-      const user = editingInfo.innerHTML.replace(/Last saved/, '').replace(/by.*/,`by ${currentUser}`);
-      var currentPage = document.querySelector("#editorDropdown > tbody > tr > td.dijitReset.dijitStretch.dijitButtonContents > div.dijitReset.dijitInputField.dijitButtonText.editorDropDownLabel > span")?.textContent
+      const user = editingInfo.innerHTML
+        .replace(/Last saved/, "")
+        .replace(/by.*/, `by ${currentUser}`);
+      var currentPage = document.querySelector(
+        "#editorDropdown > tbody > tr > td.dijitReset.dijitStretch.dijitButtonContents > div.dijitReset.dijitInputField.dijitButtonText.editorDropDownLabel > span"
+      )?.textContent;
       chrome.runtime.sendMessage({
         type: "get-last-saved",
         value: {
           currentPage: currentPage,
-          modifiedBy: user
+          modifiedBy: user,
         },
       });
       sendResponse({
-        received: true
-    });
+        received: true,
+      });
     }
     const userPresenceDialog = document.querySelector("#userPresenceDialog");
     if (userPresenceDialog) {
@@ -60,101 +63,102 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   }
 
   function findElement(el, layoutItemId) {
-     const results = [];
-    
-       function findContributions(data, path) {
-         for (let i = 0; i < data.length; i++) {
-           const contributions = data[i].contributions;
-           if (contributions) {
-               for (let l = 0; l < contributions.length; l++) {
-                   const contrib = contributions[l];
-                   const contribLayoutItemId = contrib.layoutItemId;
-                   const nestedContentBoxContrib = contrib.contentBoxContrib;
-    
-                   if (contribLayoutItemId === layoutItemId) {
-                       results.push(`${path}/${contribLayoutItemId}`);
-                   }
-    
-               if (nestedContentBoxContrib) {
-                 search(
-                   nestedContentBoxContrib,
-                   `${path}/${contrib.layoutItemId}`
-                 );
-               }
-             }
-           }
-         }
-       }
-     function search(el, parentPath) {
-       if (!el || !Array.isArray(el)) return;
-    
-       for (let i = 0; i < el.length; i++) {
-         const item = el[i];
-         const layout = item.CoachViewModel?.layout || item.coachDefinition?.layout;
-         const header = item.CoachViewModel?.header || item;
-         const layoutItem = layout?.layoutItem;
-    
-         let path = parentPath;
-         if (header?.name) {
-           path = path ? `${path}/${header.name}` : `${header.name}`;
-         }
-         if (layoutItem) {
-           for (let j = 0; j < layoutItem.length; j++) {
-             const li = layoutItem[j];
-             if (li.layoutItemId === layoutItemId) {
-               results.push(`${path}/${layoutItemId}`);
-             }
-    
-             const contentBoxContrib = li.contentBoxContrib;
-    
-             if (contentBoxContrib) {
-               for (let k = 0; k < contentBoxContrib.length; k++) {
-                 const cb = contentBoxContrib[k];
-                 const contributions = cb.contributions;
-                 if (contributions) {
-                   for (let l = 0; l < contributions.length; l++) {
-                     const contrib = contributions[l];
-                     const contribLayoutItemId = contrib.layoutItemId;
-                     const nestedContentBoxContrib = contrib.contentBoxContrib;
-                     if (contribLayoutItemId === layoutItemId) {
-                       results.push(`${path}/${li.layoutItemId}/${layoutItemId}`);
-                     }
-    
-                     if (nestedContentBoxContrib) {
-                       search(
-                         nestedContentBoxContrib,
-                         `${path}/${li.layoutItemId}/${contribLayoutItemId}`
-                       );
-                     }
-                   }
-                 }
-               }
-             }
-    
-             search(
-               li.layoutItem,
-               path ? `${path}/${li.layoutItemId}` : `${li.layoutItemId}`
-             );
-           }
-         } else {
-           findContributions(el, path)
-         }
-       }
-     }
-    
-     search(el, "");
-    
-     return results;
-  }
-    
-  function searchFunction(functionName, str) {
-     // Create a regular expression to search for the function name
-     const regex = new RegExp(`\\.${functionName}\\s*=\\s*function\\(`);
-    
-     // Use the regular expression to search for the function name in the string
-     return regex.test(str);
+    const results = [];
+
+    function findContributions(data, path) {
+      for (let i = 0; i < data.length; i++) {
+        const contributions = data[i].contributions;
+        if (contributions) {
+          for (let l = 0; l < contributions.length; l++) {
+            const contrib = contributions[l];
+            const contribLayoutItemId = contrib.layoutItemId;
+            const nestedContentBoxContrib = contrib.contentBoxContrib;
+
+            if (contribLayoutItemId === layoutItemId) {
+              results.push(`${path}/${contribLayoutItemId}`);
+            }
+
+            if (nestedContentBoxContrib) {
+              search(
+                nestedContentBoxContrib,
+                `${path}/${contrib.layoutItemId}`
+              );
+            }
+          }
+        }
+      }
+    }
+    function search(el, parentPath) {
+      if (!el || !Array.isArray(el)) return;
+
+      for (let i = 0; i < el.length; i++) {
+        const item = el[i];
+        const layout =
+          item.CoachViewModel?.layout || item.coachDefinition?.layout;
+        const header = item.CoachViewModel?.header || item;
+        const layoutItem = layout?.layoutItem;
+
+        let path = parentPath;
+        if (header?.name) {
+          path = path ? `${path}/${header.name}` : `${header.name}`;
+        }
+        if (layoutItem) {
+          for (let j = 0; j < layoutItem.length; j++) {
+            const li = layoutItem[j];
+            if (li.layoutItemId === layoutItemId) {
+              results.push(`${path}/${layoutItemId}`);
+            }
+
+            const contentBoxContrib = li.contentBoxContrib;
+
+            if (contentBoxContrib) {
+              for (let k = 0; k < contentBoxContrib.length; k++) {
+                const cb = contentBoxContrib[k];
+                const contributions = cb.contributions;
+                if (contributions) {
+                  for (let l = 0; l < contributions.length; l++) {
+                    const contrib = contributions[l];
+                    const contribLayoutItemId = contrib.layoutItemId;
+                    const nestedContentBoxContrib = contrib.contentBoxContrib;
+                    if (contribLayoutItemId === layoutItemId) {
+                      results.push(
+                        `${path}/${li.layoutItemId}/${layoutItemId}`
+                      );
+                    }
+
+                    if (nestedContentBoxContrib) {
+                      search(
+                        nestedContentBoxContrib,
+                        `${path}/${li.layoutItemId}/${contribLayoutItemId}`
+                      );
+                    }
+                  }
+                }
+              }
+            }
+
+            search(
+              li.layoutItem,
+              path ? `${path}/${li.layoutItemId}` : `${li.layoutItemId}`
+            );
+          }
+        } else {
+          findContributions(el, path);
+        }
+      }
     }
 
+    search(el, "");
+
+    return results;
+  }
+
+  function searchFunction(functionName, str) {
+    // Create a regular expression to search for the function name
+    const regex = new RegExp(`\\.${functionName}\\s*=\\s*function\\(`); // Use the regular expression to search for the function name in the string
+
+    return regex.test(str);
+  }
 
   if (request.action === "get-path") {
     var getCoach = await getCoachID(containerRef);
@@ -174,42 +178,57 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     );
 
     var mapCoachViewData = allCoachViewData.map((item) => item.data);
-    
-    var mapCoachFlowData = allCoachFlowwData.map(item => {
-      return item.data.definitions.rootElement.map(v => {
+
+    var mapCoachFlowData = allCoachFlowwData
+      .map((item) => {
+        return item.data.definitions.rootElement.map((v) => {
           return {
-              name: v.name,
-              coachDefinition: v.extensionElements.userTaskImplementation.find(v => v.flowElement).flowElement.find(v => v.formDefinition).formDefinition.coachDefinition
-          }
+            name: v.name,
+            coachDefinition: v.extensionElements.userTaskImplementation
+              .find((v) => v.flowElement)
+              .flowElement.find((v) => v.formDefinition).formDefinition
+              .coachDefinition,
+          };
+        });
       })
-  }).flat(Infinity)
+      .flat(Infinity);
 
-    var findElementByControlIDFromCoachViews = findElement(mapCoachViewData, request.value.trim());
-    var findElementByControlIDFromCoachFlows = findElement(mapCoachFlowData, request.value.trim());
-    var findElementByControlID = [...findElementByControlIDFromCoachViews, ...findElementByControlIDFromCoachFlows]
+    var findElementByControlIDFromCoachViews = findElement(
+      mapCoachViewData,
+      request.value.trim()
+    );
+    var findElementByControlIDFromCoachFlows = findElement(
+      mapCoachFlowData,
+      request.value.trim()
+    );
+    var findElementByControlID = [
+      ...findElementByControlIDFromCoachViews,
+      ...findElementByControlIDFromCoachFlows,
+    ];
 
-
-    var allInlineJS = mapCoachViewData.map(item => {
+    var allInlineJS = mapCoachViewData.map((item) => {
       return {
         path: item.CoachViewModel.header.name,
-        script: item.CoachViewModel.inlineScript?.find(v => v.scriptType === "JS")?.scriptBlock,
-      }
+        script: item.CoachViewModel.inlineScript?.find(
+          (v) => v.scriptType === "JS"
+        )?.scriptBlock,
+      };
     });
-    var filterMatchFunction = allInlineJS.filter(item => {
-      return searchFunction(request.value.trim(), item.script)
-    })
+    var filterMatchFunction = allInlineJS.filter((item) => {
+      return searchFunction(request.value.trim(), item.script);
+    });
 
     chrome.runtime.sendMessage({
       type: "get-path",
       value: {
         functions: filterMatchFunction,
-        controlIds: findElementByControlID
+        controlIds: findElementByControlID,
       },
     });
-    
+
     sendResponse({
-      received: true
-  });
+      received: true,
+    });
   }
 });
 

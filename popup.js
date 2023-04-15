@@ -214,9 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return tr2;
   }
 
-
-
-  
   function createRowForPath(path) {
     const tr2 = document.createElement("tr");
     tr2.classList.add(
@@ -240,7 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "dark:text-green-300"
     );
     span.textContent = path;
-    
+
     const td1 = document.createElement("td");
 
     td1.classList.add(
@@ -254,12 +251,9 @@ document.addEventListener("DOMContentLoaded", function () {
     td1.setAttribute("scope", "row");
     td1.appendChild(span);
 
-
     tr2.appendChild(td1);
     return tr2;
   }
-
-
 
   function convertTimestamp(timestamp) {
     const dateObj = new Date(timestamp);
@@ -275,59 +269,65 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function handleSearchClick(e) {
     e.preventDefault();
-    var input = document.querySelector("#search").value;
-    document.querySelector("#get-path-error").textContent = ''
+    const input = document.querySelector("#search").value;
+    document.querySelector("#get-path-error").textContent = "";
     if (input) {
-      document.querySelector("#search-button").textContent = 'Loading..';
+      document.querySelector("#search-button").textContent = "Loading..";
       chrome.tabs.query(
         {
           active: true,
           currentWindow: true,
         },
         function (tabs) {
-          var tabId = tabs[0].id;
-            chrome.tabs.sendMessage(tabId, {
+          const tabId = tabs[0].id;
+          chrome.tabs
+            .sendMessage(tabId, {
               action: "get-path",
               value: input,
-            }).catch(() => {
-              document.querySelector("#get-path-error").textContent = 'Please reload extension or BAW and try again.';
-              document.querySelector("#search-button").textContent = 'Search';
             })
-  
+            .catch(() => {
+              document.querySelector("#get-path-error").textContent =
+                "Please reload extension or BAW and try again.";
+              document.querySelector("#search-button").textContent = "Search";
+            });
         }
       );
     }
-
-
-
   }
   function handleCheckClick() {
-    document.querySelector("#check-button").textContent = 'Loading..'
+    document.querySelector("#check-button").textContent = "Loading..";
     chrome.tabs.query(
       {
         active: true,
         currentWindow: true,
       },
       function (tabs) {
-        var tabId = tabs[0].id;
+        const tabId = tabs[0].id;
 
         chrome.storage.local.get("data", (storedData) => {
           const data = storedData.data ? JSON.parse(storedData.data) : [];
-          chrome.tabs.sendMessage(tabId, {
-            action: "get-last-saved",
-            value: data,
-          }).catch(() => {
-            document.querySelector("#check-button").textContent = 'Get Information';
-            document.querySelector("#get-info-error").textContent = 'Please reload extension or BAW and try again.';
-          })
+          chrome.tabs
+            .sendMessage(tabId, {
+              action: "get-last-saved",
+              value: data,
+            })
+            .catch(() => {
+              document.querySelector("#check-button").textContent =
+                "Get Information";
+              document.querySelector("#get-info-error").textContent =
+                "Please reload extension or BAW and try again.";
+            });
 
-          chrome.tabs.sendMessage(tabId, {
-            action: "get-view-data",
-          }).catch(() => {
-            document.querySelector("#check-button").textContent = 'Get Information';
-            document.querySelector("#get-info-error").textContent = 'Please reload extension or BAW and try again.';
-
-          })
+          chrome.tabs
+            .sendMessage(tabId, {
+              action: "get-view-data",
+            })
+            .catch(() => {
+              document.querySelector("#check-button").textContent =
+                "Get Information";
+              document.querySelector("#get-info-error").textContent =
+                "Please reload extension or BAW and try again.";
+            });
         });
       }
     );
@@ -335,18 +335,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function handleUserMessage(request, sender, sendResponse) {
     if (request.type === "get-last-saved") {
-      var lastSavedBy = document.querySelector("#last-saved");
+      const lastSavedBy = document.querySelector("#last-saved");
       lastSavedBy.textContent = request.value.modifiedBy;
 
-      var currentPage = document.querySelector("#current-page");
+      const currentPage = document.querySelector("#current-page");
       currentPage.textContent = request.value.currentPage;
     }
 
     if (request.type === "get-view-data") {
-      var numberOfViews = document.querySelector("#number-of-views");
-      var numberOfCoaches = document.querySelector("#number-of-coaches");
-      var numberOfBo = document.querySelector("#number-of-bo");
-      var numberOfServices = document.querySelector("#number-of-services");
+      const numberOfViews = document.querySelector("#number-of-views");
+      const numberOfCoaches = document.querySelector("#number-of-coaches");
+      const numberOfBo = document.querySelector("#number-of-bo");
+      const numberOfServices = document.querySelector("#number-of-services");
 
       numberOfCoaches.textContent = request.value.coaches?.length;
       numberOfViews.textContent = request.value.views?.length;
@@ -362,7 +362,7 @@ document.addEventListener("DOMContentLoaded", function () {
       viewsTbody.innerHTML = "";
       boTbody.innerHTML = "";
       servicesTbody.innerHTML = "";
-      
+
       chrome.storage.local.get("data", (storedData) => {
         const data = storedData.data ? JSON.parse(storedData.data) : [];
 
@@ -415,66 +415,67 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
-      document.querySelector("#check-button").textContent = 'Get Information';
-      document.querySelector("#get-info-error").textContent = ''
-
+      document.querySelector("#check-button").textContent = "Get Information";
+      document.querySelector("#get-info-error").textContent = "";
     }
 
     if (request.type === "get-path") {
-      document.querySelector("#search-button").textContent = 'Search';
+      document.querySelector("#search-button").textContent = "Search";
       const functionsTbody = document.querySelector("#table-functions-path");
       const controlIdsTbody = document.querySelector("#table-controlIDs-path");
-      
-      document.querySelector("#number-of-functions").textContent = request.value.functions?.length
-      document.querySelector("#number-of-controlIds").textContent = request.value.controlIds?.length
-     
-      controlIdsTbody.innerHTML = ""
-      functionsTbody.innerHTML = ""
-      
+
+      document.querySelector("#number-of-functions").textContent =
+        request.value.functions?.length;
+      document.querySelector("#number-of-controlIds").textContent =
+        request.value.controlIds?.length;
+
+      controlIdsTbody.innerHTML = "";
+      functionsTbody.innerHTML = "";
+
       for (const obj of request.value.functions) {
-        const tableContent = createRowForPath(
-          obj.path
-        );
+        const tableContent = createRowForPath(obj.path);
 
         functionsTbody.appendChild(tableContent);
       }
 
       for (const obj of request.value.controlIds) {
-        const tableContent = createRowForPath(
-          obj
-        );
+        const tableContent = createRowForPath(obj);
 
         controlIdsTbody.appendChild(tableContent);
       }
-      
     }
   }
-  
+
   function exportJSON() {
-     chrome.storage.local.get('data', function(result) {
-       var jsonData = result.data;
-       var blob = new Blob([jsonData], { type: 'application/json' });
-       var url = URL.createObjectURL(blob);
-           chrome.downloads.download({
-         url: url,
-         filename: 'data.json'
-       }, function() {
-         URL.revokeObjectURL(url);
-       });
-     });
-    }
+    chrome.storage.local.get("data", function (result) {
+      const jsonData = result.data;
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      chrome.downloads.download(
+        {
+          url: url,
+          filename: "data.json",
+        },
+        function () {
+          URL.revokeObjectURL(url);
+        }
+      );
+    });
+  }
 
   function handleFileChange(evt) {
-    var file = evt.target.files[0];
-    var reader = new FileReader();
+    const file = evt.target.files[0];
+    const reader = new FileReader();
     messageContainer.innerHTML = "";
-    reader.onload = function(event) {
-      var jsonData = JSON.parse(event.target.result);
+    reader.onload = function (event) {
+      const jsonData = JSON.parse(event.target.result);
       preloadEids(jsonData);
-    }
+    };
     reader.readAsText(file);
   }
-  document.querySelector("#file-input").addEventListener('change', handleFileChange)
+  document
+    .querySelector("#file-input")
+    .addEventListener("change", handleFileChange);
 
   const exportButton = document.querySelector("#export-button");
   exportButton.addEventListener("click", exportJSON);
@@ -485,10 +486,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const checkButton = document.querySelector("#check-button");
   checkButton.addEventListener("click", handleCheckClick);
 
-
   const searchButton = document.querySelector("#search-button");
   searchButton.addEventListener("click", handleSearchClick);
 
-  
   chrome.runtime.onMessage.addListener(handleUserMessage);
 });
