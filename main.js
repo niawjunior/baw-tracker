@@ -90,8 +90,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     
        for (let i = 0; i < el.length; i++) {
          const item = el[i];
-         const layout = item.CoachViewModel?.layout;
-         const header = item.CoachViewModel?.header;
+         const layout = item.CoachViewModel?.layout || item.coachDefinition?.layout;
+         const header = item.CoachViewModel?.header || item;
          const layoutItem = layout?.layoutItem;
     
          let path = parentPath;
@@ -145,7 +145,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
      search(el, "");
     
      return results;
-    }
+  }
     
   function searchFunction(functionName, str) {
      // Create a regular expression to search for the function name
@@ -159,19 +159,40 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === "get-path") {
     var getCoach = await getCoachID(containerRef);
     var allCoachViewID = getCoach.data.CoachView.items.map((item) => item.poId);
-    
+    var allCoachFlowID = getCoach.data.COACHFLOW.items.map((item) => item.poId);
+
     var allCoachViewData = await Promise.all(
       allCoachViewID.map(async (id) => {
         return await getCurrentCoachViewData(id, containerRef);
       })
     );
+
+    var allCoachFlowwData = await Promise.all(
+      allCoachFlowID.map(async (id) => {
+        return await getCurrentCoachViewData(id, containerRef);
+      })
+    );
+
     var mapCoachViewData = allCoachViewData.map((item) => item.data);
-    var findElementByControlID = findElement(mapCoachViewData, request.value.trim());
+    
+    var mapCoachFlowData = allCoachFlowwData.map(item => {
+      return item.data.definitions.rootElement.map(v => {
+          return {
+              name: v.name,
+              coachDefinition: v.extensionElements.userTaskImplementation.find(v => v.flowElement).flowElement.find(v => v.formDefinition).formDefinition.coachDefinition
+          }
+      })
+  }).flat(Infinity)
+
+    var findElementByControlIDFromCoachViews = findElement(mapCoachViewData, request.value.trim());
+    var findElementByControlIDFromCoachFlows = findElement(mapCoachFlowData, request.value.trim());
+    var findElementByControlID = [...findElementByControlIDFromCoachViews, ...findElementByControlIDFromCoachFlows]
+
 
     var allInlineJS = mapCoachViewData.map(item => {
       return {
         path: item.CoachViewModel.header.name,
-        script: item.CoachViewModel.inlineScript.find(v => v.scriptType === "JS").scriptBlock,
+        script: item.CoachViewModel.inlineScript?.find(v => v.scriptType === "JS")?.scriptBlock,
       }
     });
     var filterMatchFunction = allInlineJS.filter(item => {
