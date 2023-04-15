@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleSearchClick(e) {
     e.preventDefault();
     var input = document.querySelector("#search").value;
-    
+    document.querySelector("#get-path-error").textContent = ''
     if (input) {
       document.querySelector("#search-button").textContent = 'Loading..';
       chrome.tabs.query(
@@ -290,6 +290,7 @@ document.addEventListener("DOMContentLoaded", function () {
               action: "get-path",
               value: input,
             }).catch(() => {
+              document.querySelector("#get-path-error").textContent = 'Please reload extension or BAW and try again.';
               document.querySelector("#search-button").textContent = 'Search';
             })
   
