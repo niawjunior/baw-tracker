@@ -184,9 +184,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         return item.data.definitions.rootElement.map((v) => {
           return {
             name: v.name,
-            coachDefinition: v.extensionElements.userTaskImplementation
+            coachDefinition: v.extensionElements?.userTaskImplementation
               .find((v) => v.flowElement)
-              .flowElement.find((v) => v.formDefinition).formDefinition
+              .flowElement?.find((v) => v.formDefinition)?.formDefinition
               .coachDefinition,
           };
         });
