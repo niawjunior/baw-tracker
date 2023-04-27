@@ -27,7 +27,9 @@ With our chrome extension, you can streamline your workflow, save time, and impr
 # Installation
 ## To install BAW Tracker, follow these steps:
 
-Open the Chrome Web Store in your browser. Search for "BAW Tracker" in the search bar. Click on the "Add to Chrome" button next to the BAW Tracker extension. Confirm the installation by clicking on the "Add Extension" button in the pop-up window.
+ [Download here >>](https://chrome.google.com/webstore/detail/baw-tracker/bfbodlbmemamihigpconfhngdaecdmak?hl=en&authuser=0)
+ 
+Or open the Chrome Web Store in your browser. Search for "BAW Tracker" in the search bar. Click on the "Add to Chrome" button next to the BAW Tracker extension. Confirm the installation by clicking on the "Add Extension" button in the pop-up window.
 
 # Usage
 
