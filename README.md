@@ -17,11 +17,10 @@ With our chrome extension, you can streamline your workflow, save time, and impr
 - List of Coach, View, Services, Business Object: Show the list of Coach, View, Services, Business Objects and show number of items of each option.
 - Path Finder:  Advance Search with function name or controlId and will representing the path. The path includes the names of all parent layout items.
 
-
-![alt text](path-finder.PNG)
-![alt text](path-finder2.PNG)
-![alt text](name-mapping.PNG)
-![alt text](info.PNG)
+![IMAGE_DESCRIPTION](path-finder.PNG)
+![IMAGE_DESCRIPTION](path-finder2.PNG)
+![IMAGE_DESCRIPTION](name-mapping.PNG)
+![IMAGE_DESCRIPTION](info.PNG)
 
 
 # Installation
